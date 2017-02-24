@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>hola</title>
+</head>
+<body onload="cargar();">
+	<div class="container" style="margin:10px;">
+	
+	<div class="row">
+		<video id="video" width="450" height="368" autoplay="autoplay"></video>
+        <button id="photo">Tirar foto</button>
+        <canvas id="canvas" width="450" height="368"></canvas>
+		<div class="col col-sm-6">
+			<form method="">
+				
+				<div class="input-group form-group">
+					<span class="input-group-addon">Cedula:</span>
+				      <input id="cedula" class="form-control"/>
+				</div>
+				
+					<div class="input-group form-group">
+					<span class="input-group-addon">Nombre:</span>
+				      <input id="nombre" class="form-control"/>
+				</div>
+					<div class="input-group form-group">
+					<span class="input-group-addon">Apellido:</span>
+				      <input id="apellido" class="form-control"/>
+				</div>
+					<div class="input-group form-group">
+					<span class="input-group-addon">Telefono:</span>
+				      <input id="tel" class="form-control"/>
+				</div>
+				<div>
+					<button onclick="guardarDatos();" class="btn btn-primary">Guardar</button>
+				</div>
+			</form>
+			
+		</div>
+		<div class="col cols-sm-6">
+		
+		<table class="datatable table">
+			
+			<thead>
+				<tr>
+					<th>Cedula</th>
+					<th>Nombre</th>
+					<th>Apellido</th>
+					<th>Telefono</th>
+					<th>Foto</th>
+					<th>Acciones</th>
+				</tr>
+				
+			</thead>
+			
+			<tbody id="tbdatos">
+				
+				
+			</tbody>
+			
+		</table>
+			
+		</div>
+	</div>
+	</div>
+	<script>
+	
+		var edicion =null;
+		var datos={
+			
+			agenda:[]
+		}
+		
+		
+		
+		
+		function limpiar(){
+			
+			campos = document.getElementsByTagName('input');
+			for(x=0;x<campos.length;x++){
+				campos[x].value="";
+			}
+		}
+		
+	function guardarDatos(){
+		cedula =$("#cedula").val();
+		nombre = $("#nombre").val();
+		apellido = $("#apellido").val();
+		tel = $("#tel").val();
+		cam = $("#photo").val();
+		
+	
+		var agregar ={"cedula":cedula,
+					  "nombre": nombre,
+			          "apellido":apellido,
+					  "tel": tel,
+					  "cam":cam
+					  
+					 };
+		
+		if(edicion==null){
+		datos.agenda.push(agregar);	
+		}
+		else {
+			datos.agenda[edicion]= agregar;
+		//edicion=null;
+		}
+		
+		guardar();
+		limpiar();
+		mostrar();
+	}
+		
+		
+		function mostrar(){
+			
+			tabla = document.getElementById('tbdatos');
+			tabla.innerHTML="";
+			
+			for(x=0;x<datos.agenda.length;x++){
+				
+				agre = datos.agenda[x];
+				tr = document.createElement('tr');
+				
+				for( c in agre){
+					prop =agre[c];
+					
+					td = document.createElement('td');
+					td.innerHTML=prop;
+					tr.appendChild(td);
+		      		}
+				
+				td = document.createElement('td');
+				btn = document.createElement('button');
+				btn.setAttribute('class', 'btn btn-danger');
+				btn.setAttribute('onclick','borrar('+x+')');
+				btn.innerHTML='Borrar';
+				td.appendChild(btn);
+				tr.appendChild(td);
+			    tabla.appendChild(tr);	
+				
+				
+				
+				td = document.createElement('td');
+				btn1 = document.createElement('button');
+				btn1.setAttribute('onclick','editar('+x+')');
+				btn1.setAttribute('class', 'btn btn-success');
+				btn1.innerHTML='Editar';
+				td.appendChild(btn1);
+				tr.appendChild(td);
+			    tabla.appendChild(tr);	
+			}
+		
+		}
+		
+		function borrar(index){
+			
+			if(confirm("Seguro que desea borrar este elemento?")){
+				datos.agenda.splice(index,1);
+				guardar();
+				mostrar();
+			}
+		}
+		
+		function editar(index){
+			edicion = index;
+			var ag = datos.agenda[index];
+			for(c in ag){
+				$('#'+c).val(ag[c]);
+				;
+			}
+			
+			
+		}
+		
+		function guardar(){
+			localStorage.setItem('agregar',JSON.stringify(datos));
+		}
+		
+		function cargar(){
+			
+			tempo = localStorage.getItem('agregar');
+			
+			if(tempo!=null){
+				datos=JSON.parse(tempo);
+			}
+mostrar();
+		}
+		  $(document).ready
+(
+    function()
+    {
+ 
+        var canvas = $('#canvas'),
+		
+            cxt = canvas[0].getContext('2d'),
+      
+       video = $('#video'),
+            video = video[0];
+ 
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia(
+                { 'video': true },
+                function(stream)
+                {
+                    video.src = stream;
+                    video.play();
+                }
+            );
+        } else if (navigator.webkitGetUserMedia) {
+            navigator.webkitGetUserMedia
+            (
+                { 'video': true },
+                function(stream)
+                {
+                    video.src = window.webkitURL.createObjectURL(stream);
+                    video.play();
+         
+        }
+            );
+        } else if (navigator.mozGetUserMedia) {
+            navigator.mozGetUserMedia
+            (
+                { 'video': true },
+                function(stream)
+                {
+                    video.mozSrcObject = stream;
+                    video.play();
+
+                },
+                function(err)
+                {
+                    alert('An error occured! '+err);
+                }
+            );
+        }
+        $('#photo').click
+        (
+            function()
+            {
+                cxt.drawImage(video, 0, 0, 250, 300);
+				var data = canvas.getImageData(0,0,video.width,video.height).data;
+				localStorage.setItem('image',data);
+				
+				
+				
+				          }
+        );
+    }
+);
+				
+		
+	</script>
+</body>
+</html>
